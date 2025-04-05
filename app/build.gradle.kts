@@ -1,7 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
-    kotlin("plugin.serialization") version "1.8.0"
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.kotlin.compose)
+
 }
 
 android {
@@ -38,7 +40,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
     }
     packaging {
         resources {
@@ -49,9 +51,9 @@ android {
 
 dependencies {
 
-    //implementation (libs.core) // oder die neueste Version von ARCore
-    //implementation (libs.play.services.location) // die Location Library
-    //implementation (libs.play.services.ads) // Falls du Ad SDK benötigst
+    implementation (libs.core) // oder die neueste Version von ARCore
+    implementation (libs.play.services.location) // die Location Library
+    implementation (libs.play.services.ads) // Falls du Ad SDK benötigst
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

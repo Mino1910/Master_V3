@@ -51,9 +51,8 @@ android {
 
 dependencies {
 
-    implementation (libs.core) // oder die neueste Version von ARCore
-    implementation (libs.play.services.location) // die Location Library
-    implementation (libs.play.services.ads) // Falls du Ad SDK benötigst
+    implementation(libs.core) // oder die neueste Version von ARCore
+    implementation(libs.play.services.location) // die Location Library
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

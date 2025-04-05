@@ -4,9 +4,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,12 +12,9 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.master_v3.util.Utils
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
-import com.google.ar.core.Plane
 import com.google.ar.core.TrackingFailureReason
 import com.google.ar.core.TrackingState
 import io.github.sceneview.ar.ARScene
-import io.github.sceneview.ar.arcore.createAnchorOrNull
-import io.github.sceneview.ar.arcore.getUpdatedPlanes
 import io.github.sceneview.ar.rememberARCameraNode
 import io.github.sceneview.model.ModelInstance
 import io.github.sceneview.rememberCollisionSystem
@@ -37,9 +32,8 @@ import kotlin.math.sqrt
 
 @Composable
 fun ARScreen() {
-
+    val context = LocalContext.current // Context für Toast
     Box(modifier = Modifier.fillMaxSize()) {
-
         val engine = rememberEngine()
         val modelLoader = rememberModelLoader(engine = engine)
         val materialLoader = rememberMaterialLoader(engine = engine)
@@ -47,18 +41,10 @@ fun ARScreen() {
         val childNodes = rememberNodes()
         val view = rememberView(engine = engine)
         val collisionSystem = rememberCollisionSystem(view = view)
-        val planeRenderer = remember {
-            mutableStateOf(true)
-        }
-        val modelInstance = remember {
-            mutableListOf<ModelInstance>()
-        }
-        val trackingFailureReason = remember {
-            mutableStateOf<TrackingFailureReason?>(null)
-        }
-        val frame = remember {
-            mutableStateOf<Frame?>(null)
-        }
+        val planeRenderer = remember { mutableStateOf(true) }
+        val modelInstance = remember { mutableListOf<ModelInstance>() }
+        val trackingFailureReason = remember { mutableStateOf<TrackingFailureReason?>(null) }
+        val frame = remember { mutableStateOf<Frame?>(null) }
 
         ARScene(
             modifier = Modifier.fillMaxSize(),
@@ -78,8 +64,9 @@ fun ARScreen() {
                 if (childNodes.isEmpty()) {
                     val earth = session.earth
                     Log.d("hilfe", "Earth TrackingState: ${earth?.trackingState}")
+
+                    // Wenn das Tracking erfolgreich ist
                     if (earth?.trackingState == TrackingState.TRACKING) {
-                        Log.d("hilfe","hurra")
                         val cameraPose = earth.cameraGeospatialPose
 
                         val userLat = cameraPose.latitude
@@ -88,26 +75,30 @@ fun ARScreen() {
 
                         val targetLat = 47.079725
                         val targetLng = 15.451217
-                        val targetAlt = userAlt // oder ein fixer Wert, z.B. 1 Meter unterhalb der Kamera
+                        val targetAlt = userAlt // Verwende denselben Wert für Höhe
 
-                        // Berechne Entfernung (in Metern)
+                        // Berechne die Entfernung zwischen Benutzer und Modell
                         val distance = haversine(userLat, userLng, targetLat, targetLng)
-                        Log.d("hilfe", "$distance")
 
-                        val anchor = earth.createAnchor(targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f)
+                        // Zeige eine Toast-Nachricht, wenn der Benutzer nah am Modell ist
+                        if (distance < 50) {
+                            Toast.makeText(context, "Du bist $distance Meter vom Modell entfernt", Toast.LENGTH_SHORT).show()
+                        }
 
-                        childNodes += Utils.createAnchorNode(
-                            engine = engine,
-                            anchor = anchor,
-                            modelLoader = modelLoader,
-                            materialLoader = materialLoader,
-                            modelInstance = modelInstance,
-                            model = "models/chicken.glb"
-                        )
+                        // Modell platzieren, wenn noch nicht vorhanden
+                        if (distance < 50 && childNodes.isEmpty()) {
+                            val anchor = earth.createAnchor(targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f)
+                            childNodes += Utils.createAnchorNode(
+                                engine = engine,
+                                anchor = anchor,
+                                modelLoader = modelLoader,
+                                materialLoader = materialLoader,
+                                modelInstance = modelInstance,
+                                model = "models/chicken.glb"
+                            )
+                        }
                     }
                 }
-
-
             },
             sessionConfiguration = { session, config ->
                 config.geospatialMode = Config.GeospatialMode.ENABLED

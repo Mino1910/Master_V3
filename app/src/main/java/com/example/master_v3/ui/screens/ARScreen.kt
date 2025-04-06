@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.example.master_v3.util.Utils
+import com.google.ar.core.Anchor.TerrainAnchorState
 import com.google.ar.core.Config
 import com.google.ar.core.Frame
 import com.google.ar.core.TrackingFailureReason
@@ -63,8 +64,13 @@ fun ARScreen() {
                 frame.value = updatedFrame
                 if (childNodes.isEmpty()) {
                     val earth = session.earth
-                    Log.d("hilfe", "Earth TrackingState: ${earth?.trackingState}")
-                    Toast.makeText(context, "Earth TrackingState: ${earth?.trackingState}", Toast.LENGTH_SHORT).show()
+
+                    Toast.makeText(context, "Tracking State: ${earth?.trackingState}", Toast.LENGTH_SHORT).show()
+
+                    val trackingFailure = trackingFailureReason.value
+                    if (trackingFailure != null) {
+                        Toast.makeText(context, "Tracking State: ${trackingFailure}", Toast.LENGTH_SHORT).show()
+                    }
 
                     // Wenn das Tracking erfolgreich ist
                     if (earth?.trackingState == TrackingState.TRACKING) {
@@ -72,11 +78,10 @@ fun ARScreen() {
 
                         val userLat = cameraPose.latitude
                         val userLng = cameraPose.longitude
-                        val userAlt = cameraPose.altitude
 
                         val targetLat = 47.079725
                         val targetLng = 15.451217
-                        val targetAlt = userAlt // Verwende denselben Wert für Höhe
+                        val targetAlt = 0.0 // Verwende denselben Wert für Höhe
 
                         // Berechne die Entfernung zwischen Benutzer und Modell
                         val distance = haversine(userLat, userLng, targetLat, targetLng)
@@ -84,16 +89,28 @@ fun ARScreen() {
                         // Zeige eine Toast-Nachricht, wenn der Benutzer nah am Modell ist
                         Toast.makeText(context, "Du bist $distance Meter vom Modell entfernt", Toast.LENGTH_SHORT).show()
 
-                        // Modell platzieren, wenn noch nicht vorhanden
-                        if (distance < 50 && childNodes.isEmpty()) {
-                            val anchor = earth.createAnchor(targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f)
-                            childNodes += Utils.createAnchorNode(
-                                engine = engine,
-                                anchor = anchor,
-                                modelLoader = modelLoader,
-                                materialLoader = materialLoader,
-                                modelInstance = modelInstance,
-                                model = "models/chicken.glb"
+                        // Modell platzieren, wenn noch nicht vorhanden und der Benutzer nahe genug ist
+                        if (childNodes.isEmpty()) {
+                            // Verwende resolveAnchorOnTerrainAsync, um den TerrainAnchor zu erstellen
+                            earth.resolveAnchorOnTerrainAsync(
+                                targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f,
+                                { anchor, state ->
+                                    if (state == TerrainAnchorState.SUCCESS) {
+                                        // Wenn der Anchor erfolgreich platziert wurde, erstelle den Node
+                                        childNodes += Utils.createAnchorNode(
+                                            engine = engine,
+                                            anchor = anchor,
+                                            modelLoader = modelLoader,
+                                            materialLoader = materialLoader,
+                                            modelInstance = modelInstance,
+                                            model = "models/chicken.glb"
+                                        )
+                                        Toast.makeText(context, "Anker platziert", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        // Fehlerbehandlung, falls der Anchor nicht platziert werden konnte
+                                        Toast.makeText(context, "Fehler beim Platzieren des Ankers", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
                             )
                         }
                     }

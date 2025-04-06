@@ -64,6 +64,7 @@ fun ARScreen() {
                 if (childNodes.isEmpty()) {
                     val earth = session.earth
                     Log.d("hilfe", "Earth TrackingState: ${earth?.trackingState}")
+                    Toast.makeText(context, "Earth TrackingState: ${earth?.trackingState}", Toast.LENGTH_SHORT).show()
 
                     // Wenn das Tracking erfolgreich ist
                     if (earth?.trackingState == TrackingState.TRACKING) {
@@ -81,9 +82,7 @@ fun ARScreen() {
                         val distance = haversine(userLat, userLng, targetLat, targetLng)
 
                         // Zeige eine Toast-Nachricht, wenn der Benutzer nah am Modell ist
-                        if (distance < 50) {
-                            Toast.makeText(context, "Du bist $distance Meter vom Modell entfernt", Toast.LENGTH_SHORT).show()
-                        }
+                        Toast.makeText(context, "Du bist $distance Meter vom Modell entfernt", Toast.LENGTH_SHORT).show()
 
                         // Modell platzieren, wenn noch nicht vorhanden
                         if (distance < 50 && childNodes.isEmpty()) {

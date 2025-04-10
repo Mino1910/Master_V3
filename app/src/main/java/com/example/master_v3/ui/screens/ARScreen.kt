@@ -90,29 +90,29 @@ fun ARScreen() {
                         Toast.makeText(context, "Du bist $distance Meter vom Modell entfernt", Toast.LENGTH_SHORT).show()
 
                         // Modell platzieren, wenn noch nicht vorhanden und der Benutzer nahe genug ist
-                        if (childNodes.isEmpty()) {
-                            // Verwende resolveAnchorOnTerrainAsync, um den TerrainAnchor zu erstellen
-                            earth.resolveAnchorOnTerrainAsync(
-                                targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f,
-                                { anchor, state ->
-                                    if (state == TerrainAnchorState.SUCCESS) {
-                                        // Wenn der Anchor erfolgreich platziert wurde, erstelle den Node
-                                        childNodes += Utils.createAnchorNode(
-                                            engine = engine,
-                                            anchor = anchor,
-                                            modelLoader = modelLoader,
-                                            materialLoader = materialLoader,
-                                            modelInstance = modelInstance,
-                                            model = "models/chicken.glb"
-                                        )
-                                        Toast.makeText(context, "Anker platziert", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        // Fehlerbehandlung, falls der Anchor nicht platziert werden konnte
-                                        Toast.makeText(context, "Fehler beim Platzieren des Ankers", Toast.LENGTH_SHORT).show()
-                                    }
-                                }
-                            )
-                        }
+//                        if (childNodes.isEmpty()) {
+//                            // Verwende resolveAnchorOnTerrainAsync, um den TerrainAnchor zu erstellen
+//                            earth.resolveAnchorOnTerrainAsync(
+//                                targetLat, targetLng, targetAlt, 0f, 0f, 0f, 1f,
+//                                { anchor, state ->
+//                                    if (state == TerrainAnchorState.SUCCESS) {
+//                                        // Wenn der Anchor erfolgreich platziert wurde, erstelle den Node
+//                                        childNodes += Utils.createAnchorNode(
+//                                            engine = engine,
+//                                            anchor = anchor,
+//                                            modelLoader = modelLoader,
+//                                            materialLoader = materialLoader,
+//                                            modelInstance = modelInstance,
+//                                            model = "models/chicken.glb"
+//                                        )
+//                                        Toast.makeText(context, "Anker platziert", Toast.LENGTH_SHORT).show()
+//                                    } else {
+//                                        // Fehlerbehandlung, falls der Anchor nicht platziert werden konnte
+//                                        Toast.makeText(context, "Fehler beim Platzieren des Ankers", Toast.LENGTH_SHORT).show()
+//                                    }
+//                                }
+//                            )
+//                        }
                     }
                 }
             },
